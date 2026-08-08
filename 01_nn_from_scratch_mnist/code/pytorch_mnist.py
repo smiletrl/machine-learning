@@ -2,33 +2,34 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
-from datasets import load_dataset
-import numpy as np
+from torchvision import datasets  # 引入 torchvision 用于下载数据
 import time
 
 # ==========================================
 # 1. 加载并打包数据 (引入测试集)
 # ==========================================
-print("正在加载数据集...")
-ds = load_dataset("ylecun/mnist")
+print("正在通过 PyTorch (torchvision) 下载/加载数据集...")
+
+# 使用 torchvision.datasets.MNIST 自动下载并加载数据
+# 参数 root='./data' 表示数据将保存在当前目录下的 data 文件夹内
+train_data_raw = datasets.MNIST(root='./data', train=True, download=True)
+test_data_raw = datasets.MNIST(root='./data', train=False, download=True)
 
 # 【PyTorch 特色 1：张量形状】
-# NumPy 版中用了 (784, 60000) 这种 (特征数, 样本数) 的形状。
-# PyTorch 默认要求 (样本数, 特征数)，即 (60000, 784)，所以这里不需要 .T 转置了。
-
+# 原数据格式为 (60000, 28, 28) 的 uint8 像素矩阵。
+# 这里用 .view(-1, 784) 直接将 28x28 展平为 784，并将 uint8 转为 float32 后归一化。
 # --- 准备训练集 (日常作业，60000张) ---
-X_train_np = np.array([np.array(img).flatten() for img in ds['train']['image']])
-X_train = torch.tensor(X_train_np, dtype=torch.float32) / 255.0
+X_train = train_data_raw.data.view(-1, 784).float() / 255.0
 
 # 【PyTorch 特色 2：告别 One-Hot】
-# PyTorch 算交叉熵时，底层会自动处理类别标签，不需要手动转成 [0,1,0,0...] 的 One-Hot 格式，直接传数字即可！
-Y_train = torch.tensor(ds['train']['label'], dtype=torch.long)
+# PyTorch 算交叉熵时，底层会自动处理类别标签，直接传数字即可！
+# torchvision 返回的 targets 已经是 torch.long 类型的张量
+Y_train = train_data_raw.targets
 
 # --- 准备测试集 (期末考试，10000张，完全不参与训练) ---
 print("正在准备期末考试卷(测试集)...")
-X_test_np = np.array([np.array(img).flatten() for img in ds['test']['image']])
-X_test = torch.tensor(X_test_np, dtype=torch.float32) / 255.0
-Y_test = torch.tensor(ds['test']['label'], dtype=torch.long)
+X_test = test_data_raw.data.view(-1, 784).float() / 255.0
+Y_test = test_data_raw.targets
 
 # 【PyTorch 特色 3：DataLoader 数据管家】
 # 替代原本手写的 permutation 和 for 循环切片，它会自动帮我们打乱数据并切分成 Batch。
@@ -50,7 +51,7 @@ class MNISTNet(nn.Module):
             nn.ReLU(),
             nn.Linear(16, 15),
             nn.ReLU(),
-            nn.Linear(15, 10) 
+            nn.Linear(15, 10)
             # 【注意】PyTorch 的 CrossEntropyLoss 自带 Softmax 效果，
             # 所以这里最后一层不需要单独加 Softmax 层！输出的是纯净的“对数几率 (Logits)”。
         )
@@ -69,13 +70,13 @@ epochs = 5
 learning_rate = 0.5
 lr_decay = 0.8
 
-# 相当于之前手动算的交叉熵误差 (内部包含 Softmax)
+# 相当于手动算的交叉熵误差 (内部包含 Softmax)
 criterion = nn.CrossEntropyLoss()
 
-# 优化器：负责更新 W 和 b (相当于之前写的 W -= learning_rate * dW)
+# 优化器：负责更新 W 和 b
 optimizer = optim.SGD(model.parameters(), lr=learning_rate)
 
-# 学习率调度器：相当于之前写的 learning_rate = learning_rate * lr_decay
+# 学习率调度器：跑完一轮，步子缩小
 scheduler = optim.lr_scheduler.ExponentialLR(optimizer, gamma=lr_decay)
 
 
@@ -123,4 +124,3 @@ for epoch in range(epochs):
     
     # 【核心魔法】：跑完一轮，步子缩小到原来的 80%
     scheduler.step()
-    
