@@ -49,13 +49,16 @@ b1 = np.zeros((15, 1))
 W2 = np.random.randn(10, 15) * 0.01
 b2 = np.zeros((10, 1))
 
+audit = 0
+
 # ==========================================
 # 3. 核心算法 (前向、反向、以及纯前向的考试机制)
 # ==========================================
 def train_batch_step(X_batch, Y_batch, learning_rate):
     """训练机制：看题 -> 对答案 -> 纠正脑回路 (权重)"""
-    global W0, b0, W1, b1, W2, b2
+    global W0, b0, W1, b1, W2, b2, audit
     batch_size = X_batch.shape[1]
+
     
     # 前向传播
     h1 = np.dot(W0, X_batch) + b0
@@ -64,6 +67,10 @@ def train_batch_step(X_batch, Y_batch, learning_rate):
     a2 = relu(h2)
     h3 = np.dot(W2, a2) + b2
     p = softmax(h3)
+
+    if audit == 0:
+        print(f"W0 shape: {W0.shape}, X_batch shape: {X_batch.shape}, b0 shape: {b0.shape},p shape: {p.shape}, y shape: {Y_batch.shape}")
+        rulin = audit
     
     # 反向传播
     g3 = p - Y_batch
@@ -75,7 +82,7 @@ def train_batch_step(X_batch, Y_batch, learning_rate):
     db1 = np.sum(g2, axis=1, keepdims=True) / batch_size
     
     g1 = np.dot(W1.T, g2) * relu_deriv(h1)
-    dW0 = np.dot(g1, X_batch.T) / batch_size 
+    dW0 = np.dot(g1, X_batch.T) / batch_size
     db0 = np.sum(g1, axis=1, keepdims=True) / batch_size
     
     # 参数更新

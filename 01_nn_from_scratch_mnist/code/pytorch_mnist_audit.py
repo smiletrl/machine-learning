@@ -4,6 +4,7 @@ import torch.optim as optim
 from torch.utils.data import TensorDataset, DataLoader
 from torchvision import datasets  # 引入 torchvision 用于下载数据
 import time
+import swanlab
 
 # ==========================================
 # 1. 加载并打包数据 (引入测试集)
@@ -37,6 +38,15 @@ batch_size = 64
 train_dataset = TensorDataset(X_train, Y_train)
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 
+# 准备一个字典，用来临时存放钩子抓取到的激活值
+activation_cache = {}
+
+# 定义一个生产钩子的工厂函数
+def get_activation(layer_name):
+    def hook(module, input, output):
+        # 把这一层的输出（激活值）剥离计算图后，存入字典
+        activation_cache[layer_name] = output.detach()
+    return hook
 
 # ==========================================
 # 2. 神经网络组件
@@ -62,6 +72,20 @@ class MNISTNet(nn.Module):
 # 实例化网络
 model = MNISTNet()
 
+# 将钩子挂在 model.net 的第 1 层（即第一个 ReLU 层）上
+# 注意：索引 0 是 Linear(784, 16)，索引 1 是 ReLU()
+model.net[1].register_forward_hook(get_activation('relu_1'))
+
+swanlab.init(
+    project="MNIST-PyTorch-Hardcore",
+    experiment_name="SGD_base_Model",
+    config={
+        "learning_rate": 0.1,
+        "batch_size": 64,
+        "epochs": 5,
+        "optimizer": "SGD"
+    }
+)
 
 # ==========================================
 # 3. 核心算法 (定义损失函数、优化器和学习率策略)
@@ -115,7 +139,33 @@ for epoch in range(epochs):
         # 5. 参数更新：真正把知识记在脑子里
         optimizer.step()
 
-    
+        if step % 100 == 0:
+            current_step = epoch * len(train_loader) + step
+            swanlab.log({"training_loss": loss.item()}, step=current_step)
+
+            # swanlab.log({"weights/layer1": model.net[0].weight.detach()}, step=current_step)
+
+            weight_tensor = model.net[0].weight.detach().cpu().numpy()
+
+            # 提取关键的统计特征，用极其轻量的折线图来追踪
+            swanlab.log({
+                "weights_layer1/mean": weight_tensor.mean().item(),  # 看中心点是否发生偏移
+                "weights_layer1/std": weight_tensor.std().item(),    # 看分布有多宽 (如果趋近0说明全变成一样的死数了)
+                "weights_layer1/max": weight_tensor.max().item(),    # 抓“爆炸”的离群点
+                "weights_layer1/min": weight_tensor.min().item(),    # 抓“异常”的下限
+            }, step=current_step)
+            
+            act_tensor = activation_cache['relu_1']
+            swanlab.log({
+                "activations_relu1/mean": act_tensor.float().mean().item(),
+                "activations_relu1/max": act_tensor.float().max().item(),
+                "activations_relu1/dead_ratio": (act_tensor == 0).float().mean().item() # 监控死神经元比例
+            }, step=current_step)
+
+             # 记录激活值的直方图
+            # act = activation_cache['relu_1'].detach().cpu().numpy()
+            # swanlab.log({"activations/relu1_hist": swanlab.Histogram(act.flatten())}, step=current_step)
+
     # --- 阶段 2：在测试集上考试 (摸底测验) ---
     train_acc = evaluate(X_train, Y_train) # 看看作业做对多少
     test_acc = evaluate(X_test, Y_test)    # 看看真正考试拿多少分
@@ -126,3 +176,4 @@ for epoch in range(epochs):
     # 【核心魔法】：跑完一轮，步子缩小到原来的 80%
     scheduler.step()
 
+swanlab.finish()

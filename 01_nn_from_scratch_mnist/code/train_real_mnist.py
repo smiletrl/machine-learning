@@ -100,6 +100,7 @@ num_samples = len(X_train)
 
 print(f"=== 开始训练 (共 {epochs} Epochs, {num_samples} 张图片) ===")
 start_time = time.time()
+j = 0
 
 for epoch in range(epochs):
     correct_predictions = 0
@@ -107,8 +108,13 @@ for epoch in range(epochs):
     
     for i in range(num_samples):
         # 抓取第 i 张图片和它的真实标签
-        x_current = X_train[i]
-        y_current = Y_train[i]
+        x_current = X_train[i] # shape [784, 1]
+        y_current = Y_train[i] # shape [10, 1]
+
+        if j == 0 :
+            print(f"x_current shape: {x_current.shape}, {y_current.shape}\n")
+            j = 1
+        
         
         # 丢进网络训练一次
         loss, predicted_digit = train_step(x_current, y_current, learning_rate)
