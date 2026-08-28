@@ -1,26 +1,10 @@
 # 🚀 机器学习底层推导与工程实战
 
-[English](./README_en.md) | [简体中文](./README.md)
-
-> **撕开机器学习与底层算法的黑盒。**
-
 ## 📖 关于这个仓库
 
-这是一个**资深后端架构师以系统工程视角探索 AI 底层计算机制**的实战沙盒。
+机器学习项目练习。大模型LLM训练，参考另一个repository [LLM](https://github.com/smiletrl/llm)
 
-面对当前“理论晦涩难懂，代码全靠调包”的 AI 学习现状，我决定发挥底层架构工程师的本能——**扒开框架，回归代码与数学本质**。本项目旨在提供一套“分层式”的学习与验证体系：
-
-1. **手撕底层黑盒 (纯 NumPy)**：脱离任何 AI 框架，手推矩阵求导，用底层代码还原数学逻辑，证明高深公式不过是纸老虎。
-2. **对标工业生产 (主流 AI 框架)**：吃透底层后，提供 PyTorch 等现代工业级框架的对照实现，确保在真实生产环境里能打能抗。
-
-不管你是：
-- 🎓 **正被晦涩教材折磨，急需一套“说人话”底层推导的学生**
-- 💻 **想要跨界进入 AI 赛道，亟需补齐算法底层逻辑的开发工程师**
-- 🚀 **厌倦了只做“调包侠”，希望在真实场景中做到“懂底层、能落地”的极客**
-
-欢迎把这里当作你的 AI 底层算法实战沙盒。
-
-*快速体验：你可以通过 [公式推导手册](01_nn_from_scratch_mnist/docs/README.md) 彻底读懂神经网络底层的反向传播，并配合 [快速开始指南](01_nn_from_scratch_mnist/README.md#快速开始-quick-start) 亲手跑通纯 NumPy 的神经网络。5 个 Epoch 训练总耗时仅需 0.6 秒，准确率直飙 96%+！*
+*快速体验：你可以通过 [公式推导手册](01_nn_from_scratch_mnist/docs/README.md) 理解神经网络底层的反向传播，并配合 [快速开始指南](01_nn_from_scratch_mnist/README.md#快速开始-quick-start) 亲手跑通纯 NumPy 的神经网络。5 个 Epoch 训练总耗时仅需 0.6 秒，准确率直飙 96%+！*
 
 ## 🛠️ 本地开发环境 (Local Setup)
 
@@ -48,7 +32,6 @@ source .venv/bin/activate
 | 03 | [短视频推荐系统：从底层推导到工业落地](./03_short_video_recommendation) | 纯 NumPy 手撕 Attention, 双塔召回, 负采样, 序列建模 | 🔥 研发中 | 
 | 04 | [经典机器学习算法核心破壁 (持续更新)](#) | 决策树, SVM, K-Means 核心逻辑手推 | 🟡 规划中 | 
 | 05 | [凸优化理论与代码实战 (规划中)](#) | 梯度下降, 拉格朗日对偶, 损失曲面 | 🟡 规划中 | 
-| 06 | [大模型 Transformer 底层架构剖析 (规划中)](#) | 自注意力机制, 位置编码, 矩阵分块 | 🟡 规划中 | 
 
 ---
 *Follow my journey bridging high-performance backend engineering with hardcore AI computation. Give it a ⭐️ if it inspires you!*
