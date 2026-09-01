@@ -2,7 +2,7 @@
 
 用 NumPy 把反向传播和 PCA 推到能跑的代码。本仓库不再更新。
 
-大模型训练与推理精读见 [nanochat-guide](https://github.com/smiletrl/llm)。
+大模型训练与推理精读见 [nanochat-guide](https://github.com/smiletrl/nanochat-guide)。
 
 ## 内容
 
