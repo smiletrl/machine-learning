@@ -24,5 +24,4 @@ uv sync
 source .venv/bin/activate
 ```
 
-相关视频：小红书 / 抖音 @清影Labs。
 
