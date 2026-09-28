@@ -1,6 +1,6 @@
 # 机器学习底层推导
 
-用 NumPy 把反向传播和 PCA 推到能跑的代码。本仓库不再更新。
+用 NumPy 把反向传播和 PCA 推到能跑的代码。本仓库暂时不更新。
 
 大模型训练与推理精读见 [nanochat-guide](https://github.com/smiletrl/nanochat-guide)。
 
